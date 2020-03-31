@@ -1,6 +1,6 @@
 let stars = [];
 let angle = -1.7;
-let ship;
+let bloc;
 
 let bullets = [];
 let enemies = [];
@@ -23,13 +23,17 @@ let minEnemySize = 80;
 
 function setup() {
     createCanvas(displayWidth - 200, displayHeight - 300);
-    background(0);
+    
+    // Loading assets
     goodSq = loadImage("/assets/good.png");
     badSq = loadImage("/assets/bad.png");
     bullet = loadImage("/assets/bullet.png");
-    manVector = createVector(width / 2, height / 2);
-    bulletVelocity = createVector(1, 2);
-    ship = new Ship();
+    
+    //Initializing mr bloc
+
+    bloc = new Bloc();
+    
+    //Initializing stars
     for(let i = 0; i< 200; i++){
         stars.push({
             x: random(0, width), 
@@ -37,9 +41,9 @@ function setup() {
         });
     }
 
-    for(let i= 0; i < 10; i++){
+    //Initializing enemies
+    for(let i= 0; i < 10; i++)
         enemies.push(new Enemy());
-    }
     
 }
 
@@ -47,29 +51,35 @@ function setup() {
 function draw() {
     background(0);
     drawStars();
-    // ship.isHit();
-
+    
+    //Check if key is being pressed to adjust the angle accordiny=ky
     if(keyIsDown(LEFT_ARROW)) angle -= angleSpeed;
     if(keyIsDown(RIGHT_ARROW)) angle += angleSpeed;
-    // ship.move();
     
+    // Draw the bullets and compare the bullets against the enemies.
     bullets.forEach((bullet) => {
-        bullet.draw(ship);
+        bullet.draw(bloc);
         bullet.move();
         enemies.forEach((enemy)=> {
             enemy.gotHit(bullet);
         })
-        // bullet.hitEnemy(enemy);
     });
 
-    ship.draw(angle);
+    //Draw Mr Bloc
+    bloc.draw(angle);
     
+    //Filter out bullets that are out of screen;
     bullets = bullets.filter((bullet) => !bullet.isOutOfView());
 
 
+    // Check if the enemies have hit Mr. Bloc or bullets
+    // If they have hit Mr. Bloc then the game ends and max score yet is displayed.
+    // IF they have hit by bullets they are swapped out for new enemies.
+    // The total number of enemies on the canvas remains constant.
+
     for(let i = 0; i < enemies.length; i++){
         const enemy = enemies[i];
-        if(ship.isHit(enemy)) {
+        if(bloc.isHit(enemy)) {
             let prevScore = localStorage.getItem("Score");
             createElement("p", `Max score yet : ${max(prevScore, score)}`);
             if(prevScore > score){
@@ -104,27 +114,29 @@ function draw() {
         }
     }
 
+    // Draw the score and level
     textSize(30);
     fill(255);
     strokeWeight(1);
     text(`Score: ${score}`, 100, 100);
     text(`Level : ${level}`, 100, 150);
-    
 }
 
 
+// If you have an extra hand u can use it to shoot bullets as well
 function mouseClicked(){
     console.log("Shot bullet : ");
     let b = new Bullet(angle);
-    // console.log(b);
     bullets.push(b);
 }
 
+
+
+// Space bar bullet trigger
 function keyPressed(){
     if(keyCode === 32){
         console.log("Shot bullet : ");
         let b = new Bullet(angle);
-        // console.log(b);
         bullets.push(b);
     }
 }
